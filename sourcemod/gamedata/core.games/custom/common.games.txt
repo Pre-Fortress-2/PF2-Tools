@@ -35,8 +35,8 @@
 			{
 				"library"	"server"
 				"windows"	"@?LevelShutdown@CServerGameDLL@@UAEXXZ"
-				"linux"		"\x55\x89\xE5\x53\x83\xEC\x24\xE8\x2A\x2A\x2A\x2A\xA1\x2A\x2A\x2A\x2A"
-				"mac"		"\x55\x89\xE5\x53\x83\xEC\x24\xE8\x2A\x2A\x2A\x2A\xA1\x2A\x2A\x2A\x2A"
+				"linux"		"_ZN14CServerGameDLL13LevelShutdownEv"
+				"mac"		"_ZN14CServerGameDLL13LevelShutdownEv"
 			}
 		}
 		"Keys"
