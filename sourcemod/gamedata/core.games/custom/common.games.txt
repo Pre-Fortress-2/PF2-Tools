@@ -5,8 +5,7 @@
 	{
 		"Offsets"
 		{
-			/* Offset into LevelShutdown */
-			// See "LevelShutdown"
+			// These make no sense, where are these referenced?
 			"gEntList"
 			{
 				"windows" 	"87"
@@ -29,8 +28,6 @@
 		}
 		"Signatures"
 		{
-			// CServerGameDLL::DLLShutdown + 2 vtable offset from me
-			// Has string "stats.txt" as 'aStatsTxt'
 			"LevelShutdown"
 			{
 				"library"	"server"
@@ -43,8 +40,8 @@
 		{
 			"UseInvalidUniverseInSteam2IDs"		"1"
 			"HudRadioMenuMsg"        "ShowMenu"
-            "RadioMenuTimeout"        "4"
-            "HudTextMsg"            "HudMsg"
+			"RadioMenuTimeout"        "4"
+			"HudTextMsg"            "HudMsg"
 		}
 	}
 }
