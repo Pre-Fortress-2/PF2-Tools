@@ -11,7 +11,7 @@
 			"ForceRespawn"
 			{
 				"windows"	"326"
-				"linux"	"327"
+				"linux"		"327"
 				"mac"		"327"
 			}
 			// "RandomCritRapid"
