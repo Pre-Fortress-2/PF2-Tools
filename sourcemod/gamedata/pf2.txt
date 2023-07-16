@@ -93,7 +93,7 @@
 				"library" 	"server"
 				"windows"	"@?SetInWaitingForPlayers@CTeamplayRoundBasedRules@@IAEX_N@Z"
 				"linux" 	"@_ZN24CTeamplayRoundBasedRules22SetInWaitingForPlayersEb"
-				"mac" 	"@_ZN24CTeamplayRoundBasedRules22SetInWaitingForPlayersEb"
+				"mac"		"@_ZN24CTeamplayRoundBasedRules22SetInWaitingForPlayersEb"
 			}
 			"CalcIsAttackCriticalHelper"
 			{
