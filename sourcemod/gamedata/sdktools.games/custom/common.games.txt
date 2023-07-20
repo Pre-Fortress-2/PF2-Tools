@@ -131,11 +131,19 @@
 			// conn - probably isn't right but who cares
 			// dani - i do, this crud stinks
 			// prolly found in engine.so of sdk13
+			//"InfoChanged"
+			//{
+			//	"windows"	"79"
+			//	"linux"		"80"
+			//	"mac"		"80"
+			//}
+			// Reverted to InfoChanged values from 	
+			// https://github.com/alliedmodders/sourcemod/blob/1fbe5e1daaee9ba44164078fe7f59d862786e612/gamedata/sdktools.games/engine.sdk2013.txt
 			"InfoChanged"
 			{
-				"windows"	"79"
-				"linux"		"80"
-				"mac"		"80"
+				"windows"	"140"
+				"linux"		"140"
+				"mac"		"140"
 			}
 		}
 		"Keys"
