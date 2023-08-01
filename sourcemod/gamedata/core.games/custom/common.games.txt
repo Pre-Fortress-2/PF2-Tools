@@ -5,18 +5,18 @@
 	{
 		"Offsets"
 		{
-			// These make no sense, where are these referenced?
-			"gEntList"
-			{
-				"windows" 	"87"
-				"linux" 	"99"
-				"mac" 		"99"
-			}
-			"EntInfo"
-			{
-				"linux"		"4"
-				"mac"		"4"
-			}
+			/* Offset into LevelShutdown */
+			// See "LevelShutdown"
+			// SM gets this automatically by exporting the var
+			//"gEntList"
+			//{
+			//	"windows"	"87"
+			//	"linux"		"99"
+			//}
+			//"EntInfo"
+			//{
+			//	"linux"		"4"
+			//}
 			"GetDataDescMap"
 			{
 				"windows"		"11"
