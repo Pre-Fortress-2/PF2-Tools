@@ -56,7 +56,7 @@
 			"AddCondition"
 			{
 				"library"	"server"
-				"windows"	"@?AddCond@CTFPlayerShared@@QAEXHM@Z"
+				"windows" 	"@?AddCond@CTFPlayerShared@@QAEXHM@Z"
 				"linux"		"@_ZN15CTFPlayerShared7AddCondEif"
 				"mac"		"@_ZN15CTFPlayerShared7AddCondEif"
 			}
@@ -65,17 +65,16 @@
 			{
 				"library"	"server"
 				"windows"	"@?RemoveCond@CTFPlayerShared@@QAEXH@Z"
-				"linux"	"@_ZN15CTFPlayerShared10RemoveCondEi"
+				"linux"		"@_ZN15CTFPlayerShared10RemoveCondEi"
 				"mac"		"@_ZN15CTFPlayerShared10RemoveCondEi"
 			}
-			//"CanPlayerTeleport"
-			// doesn't exist in pf2
-			//{
-			//	"library" 	"server"
-			//	"windows"	"\x55\x8B\xEC\x53\x56\x57\x8B\x7D\x08\x32\xDB"
-			//	"linux" 	"\x55\x89\xE5\x56\x53\x83\xEC\x10\x8B\x5D\x0C\x85\xDB\x74\x2A\x89\x1C\x24"
-			//	"mac" 		"\x55\x89\xE5\x56\x53\x83\xEC\x10\x8B\x5D\x0C\x85\xDB\x74\x2A\x89\x1C\x24"
-			//}
+			// CObjectTeleporter::PlayerCanBeTeleported
+			"CanPlayerTeleport"
+			{
+				"library"	"server"
+				"windows"	"@?PlayerCanBeTeleported@CObjectTeleporter@@QAE_NPAVCTFPlayer@@@Z"
+				"linux"		"@_ZN17CObjectTeleporter21PlayerCanBeTeleportedEP9CTFPlayer"
+			}
 			"SetInWaitingForPlayers"
 			{
 				"library" 	"server"
@@ -86,7 +85,7 @@
 			"CalcIsAttackCriticalHelper"
 			{
 				"library" 	"server"
-				"windows" 	"@?CalcIsAttackCriticalHelper@CTFWeaponBase@@UAE_NXZ"
+				"windows"	"@?CalcIsAttackCriticalHelper@CTFWeaponBase@@UAE_NXZ"
 				"linux" 	"@_ZN13CTFWeaponBase26CalcIsAttackCriticalHelperEv"
 				"mac" 		"@_ZN13CTFWeaponBase26CalcIsAttackCriticalHelperEv"
 			}
