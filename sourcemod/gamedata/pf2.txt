@@ -14,14 +14,13 @@
 			{
 				"windows" 	"369"
 				"linux" 	"370"
-				"linux" 	"370"
+				"mac"	 	"370"
 			}
 			"CalcIsAttackCriticalHelperNoCrits"
 			{
-				// Needs to be checked
-				//"windows" 	"390"
-				//"linux" 	"395"
-				//"linux" 	"395"
+				"windows" 	"383"
+				"linux" 	"384"
+				"mac"	 	"384"
 			}
 		}
 		"Signatures"
@@ -75,6 +74,7 @@
 				"library"	"server"
 				"windows"	"@?PlayerCanBeTeleported@CObjectTeleporter@@QAE_NPAVCTFPlayer@@@Z"
 				"linux"		"@_ZN17CObjectTeleporter21PlayerCanBeTeleportedEP9CTFPlayer"
+				"mac"		"@_ZN17CObjectTeleporter21PlayerCanBeTeleportedEP9CTFPlayer"
 			}
 			"SetInWaitingForPlayers"
 			{
@@ -90,14 +90,12 @@
 				"linux" 	"@_ZN13CTFWeaponBase26CalcIsAttackCriticalHelperEv"
 				"mac" 		"@_ZN13CTFWeaponBase26CalcIsAttackCriticalHelperEv"
 			}
-			// CTFWeaponBase::CanFireRandomCrit
+			// CTFWeaponBase::CanFireCriticalShot
 			"CalcIsAttackCriticalHelperNoCrits"
 		    	{
 				"library"    "server"
-				// Needs exported
-				// "windows"    "@?CanFireRandomCrit@CTFWeaponBase@@UAE_NXZ"
-				// "windows"    "@?CanFireCriticalShot@CTFWeaponBase@@UAE_N_N@Z"
-				// "linux"        "@_ZN13CTFWeaponBase17CanFireRandomCritEv"
+				"windows"    "@?CanFireCriticalShot@CTFWeaponBase@@UAE_N_N@Z"
+				"linux"      "@_ZN13CTFWeaponBase19CanFireCriticalShotEb"
 		    	}
 		}
 	}
