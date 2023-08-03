@@ -96,6 +96,7 @@
 				"library"    "server"
 				"windows"    "@?CanFireCriticalShot@CTFWeaponBase@@UAE_N_N@Z"
 				"linux"      "@_ZN13CTFWeaponBase19CanFireCriticalShotEb"
+				"mac"	     "@_ZN13CTFWeaponBase19CanFireCriticalShotEb"
 		    	}
 		}
 	}
