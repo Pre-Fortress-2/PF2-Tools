@@ -6,11 +6,11 @@
 #pragma semicolon 1
 #include <pf2>
 
-#define PLUGIN_VERSION 		"1.0.0"
+#define PLUGIN_VERSION 		"1.1.0"
 
 public Plugin myinfo =  {
 	name = "PF2 Tools", 
-	author = "original TF2Classic version by Scag, PF2 version by Sour Dani & conneath", 
+	author = "Scag, https://sappho.io", Conneath, Sour Dani, 
 	description = "PF2 natives and forwards for SourceMod", 
 	version = PLUGIN_VERSION, 
 	url = ""
@@ -20,7 +20,7 @@ GlobalForward
 	hOnConditionAdded,
 	hOnConditionRemoved,
 	hCalcIsAttackCritical,
-	//hCanPlayerTeleport,
+	hCanPlayerTeleport,
 	hOnWaitingForPlayersStart,
 	hOnWaitingForPlayersEnd
 ;
@@ -72,6 +72,7 @@ enum struct stun_struct_t
 	}
 }
 
+
 stun_struct_t
 	g_Stuns[MAXPLAYERS+1]
 ;
@@ -89,12 +90,20 @@ enum struct CondShit
 }
 
 #define CHECK(%1,%2) if (!(%1)) LogError("Could not load native for \"" ... %2 ... "\"")
+Address m_pOuter = Address_Null;
 
+// We need to do this to fix some stupid race condition that I don't give a shit enough about to properly debug
+// -sappho
 public void OnPluginStart()
+{
+	RequestFrame(WaitAFrame);
+}
+
+void WaitAFrame()
 {
 	GameData conf = LoadGameConfigFile("pf2");
 	if (!conf)	// Dies anyway but w/e
-		SetFailState("Gamedata \"tf2classic/addons/sourcemod/gamedata/tf2c.txt\" does not exist.");
+		SetFailState("Gamedata \"pf2/addons/sourcemod/gamedata/pf2.txt\" does not exist.");
 
 	// Burn
 	StartPrepSDKCall(SDKCall_Raw);
@@ -103,18 +112,25 @@ public void OnPluginStart()
 	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
 	hIgnitePlayer = EndPrepSDKCall();
 	CHECK(hIgnitePlayer, "TF2_IgnitePlayer");
+	PrintToServer("-> TF2_IgnitePlayer");
+
+	//Address sig = conf.GetMemSig("Burn");
+	//LogMessage("Sig = %x", sig);
 
 	// Respawn
 	StartPrepSDKCall(SDKCall_Player);
 	PrepSDKCall_SetFromConf(conf, SDKConf_Virtual, "ForceRespawn");
 	hRespawnPlayer = EndPrepSDKCall();
 	CHECK(hRespawnPlayer, "TF2_RespawnPlayer");
+	PrintToServer("-> TF2_RespawnPlayer");
 
 	// Regenerate
 	StartPrepSDKCall(SDKCall_Player);
 	PrepSDKCall_SetFromConf(conf, SDKConf_Signature, "Regenerate");
 	hRegeneratePlayer = EndPrepSDKCall();
 	CHECK(hRegeneratePlayer, "TF2_RegeneratePlayer");
+	PrintToServer("-> TF2_RegeneratePlayer");
+
 
 	// AddCond
 	StartPrepSDKCall(SDKCall_Raw);
@@ -124,6 +140,7 @@ public void OnPluginStart()
 	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
 	hAddCondition = EndPrepSDKCall();
 	CHECK(hAddCondition, "TF2_AddCondition");
+	PrintToServer("-> TF2_AddCondition");
 
 	// RemoveCond
 	StartPrepSDKCall(SDKCall_Raw);
@@ -131,6 +148,7 @@ public void OnPluginStart()
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	hRemoveCondition = EndPrepSDKCall();
 	CHECK(hRemoveCondition, "TF2_RemoveCondition");
+	PrintToServer("-> TF2_RemoveCondition");
 
 	// Disguise
 	StartPrepSDKCall(SDKCall_Raw);
@@ -140,12 +158,14 @@ public void OnPluginStart()
 	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
 	hDisguisePlayer = EndPrepSDKCall();
 	CHECK(hDisguisePlayer, "TF2_DisguisePlayer");
+	PrintToServer("-> TF2_DisguisePlayer");
 
 	// RemoveDisguise
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(conf, SDKConf_Signature, "RemoveDisguise");
 	hRemovePlayerDisguise = EndPrepSDKCall();
 	CHECK(hRemovePlayerDisguise, "TF2_RemovePlayerDisguise");
+	PrintToServer("-> TF2_RemovePlayerDisguise");
 
 	// DHooks
 	Handle hook;
@@ -161,6 +181,9 @@ public void OnPluginStart()
 		DHookEnableDetour(hook, true, CTFPlayerShared_AddCondPost);
 	}
 	else LogError("Could not load detour for AddCondition, TF2_OnConditionAdded forward has been disabled");
+	PrintToServer("-> AddCondition");
+
+
 
 	hook = DHookCreateDetourEx(conf, "RemoveCondition", CallConv_THISCALL, ReturnType_Void, ThisPointer_Address);
 	if (hook)
@@ -169,17 +192,20 @@ public void OnPluginStart()
 		DHookAddParam(hook, HookParamType_Bool);
 		// Same as the AddCond cheese
 		DHookEnableDetour(hook, false, CTFPlayerShared_RemoveCond);
-		DHookEnableDetour(hook, true, CTFPlayerShared_RemoveCondPost);		
+		DHookEnableDetour(hook, true, CTFPlayerShared_RemoveCondPost);
 	}
 	else LogError("Could not load detour for RemoveCondition, TF2_OnConditionRemoved forward has been disabled");
+	PrintToServer("-> RemoveCondition");
 
-	/*hook = DHookCreateDetourEx(conf, "CanPlayerTeleport", CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity);
+	hook = DHookCreateDetourEx(conf, "CanPlayerTeleport", CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity);
 	if (hook)
 	{
 		DHookAddParam(hook, HookParamType_CBaseEntity);
 		DHookEnableDetour(hook, false, CBaseObjectTeleporter_PlayerCanBeTeleported);
 		DHookEnableDetour(hook, true, CBaseObjectTeleporter_PlayerCanBeTeleportedPost);
-	}*/
+	}
+	PrintToServer("-> CanPlayerTeleport");
+
 
 	hook = DHookCreateDetourEx(conf, "SetInWaitingForPlayers", CallConv_THISCALL, ReturnType_Void, ThisPointer_Address);
 	if (hook)
@@ -188,23 +214,35 @@ public void OnPluginStart()
 		DHookEnableDetour(hook, false, CTeamPlayRoundBasedRules_SetInWaitingForPlayers);
 		DHookEnableDetour(hook, true, CTeamPlayRoundBasedRules_SetInWaitingForPlayersPost);
 	}
+	PrintToServer("-> SetInWaitingForPlayers");
 
-	// So, TF2Classic is stupid or something but I can't use a plain DHook for this
+	// So, pf2 is stupid or something but I can't use a plain DHook for this
 	// Gotta detour it ;-;
-	hook = DHookCreateDetourEx(conf, "CalcIsAttackCriticalHelper", CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity);
-	if (hook)
-	{
-		DHookEnableDetour(hook, false, CTFWeaponBase_CalcIsAttackCriticalHelper);
-		DHookEnableDetour(hook, true, CTFWeaponBase_CalcIsAttackCriticalHelperPost);
-	}
-
-	/*hook = DHookCreateDetourEx(conf, "CalcIsAttackCriticalHelperNoCrits", CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity);
-	if (hook)
-	{
-		DHookEnableDetour(hook, false, CTFWeaponBase_CalcIsAttackCriticalHelperNoCrits);
-		DHookEnableDetour(hook, true, CTFWeaponBase_CalcIsAttackCriticalHelperNoCritsPost);		
-	}*/
-
+	//hook = DHookCreateDetourEx(conf, "CalcIsAttackCriticalHelper", CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity);
+	//if (hook)
+	//{
+	//	DHookEnableDetour(hook, false, CTFWeaponBase_CalcIsAttackCriticalHelper);
+	//	DHookEnableDetour(hook, true, CTFWeaponBase_CalcIsAttackCriticalHelperPost);
+	//}
+	//else
+	//{
+	//	LogError("Couldn't load CalcIsAttackCriticalHelper...");
+	//}
+	//PrintToServer("-> CalcIsAttackCriticalHelper");
+	//
+	//hook = DHookCreateDetourEx(conf, "CalcIsAttackCriticalHelperNoCrits", CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity, false /*WhineAboutFailure*/);
+	//if (hook)
+	//{
+	//	DHookEnableDetour(hook, false, CTFWeaponBase_CalcIsAttackCriticalHelperNoCrits);
+	//	DHookEnableDetour(hook, true, CTFWeaponBase_CalcIsAttackCriticalHelperNoCritsPost);		
+	//}
+	//else
+	//{
+	//	LogError("Couldn't load CalcIsAttackCriticalHelperNoCrits...");
+	//}
+	//
+	//PrintToServer("-> CalcIsAttackCriticalHelperNoCrits");
+	//
 	delete conf;
 
 	for (int i = MaxClients; i; --i)
@@ -226,6 +264,9 @@ public void OnPluginStart()
 	// 2 blocksize because cond + time
 	g_Bullshit1 = new ArrayStack(sizeof(CondShit));
 	g_Bullshit2 = new ArrayStack(sizeof(CondShit));
+	m_pOuter = view_as<Address>(FindSendPropInfo("CTFPlayer", "m_Shared"));
+	PrintToServer("----> CTFPlayer::m_Shared / m_pOuter offs = %i/0x%x", m_pOuter, m_pOuter);
+	PrintToServer("PF2-Tools loaded!");
 }
 
 public void OnClientPutInServer(int client)
@@ -275,11 +316,11 @@ public void TF2_OnConditionRemoved(int client, TFCond cond)
 
 public Action OnPlayerRunCmd(int client, int &buttons)
 {
-	/*if (TF2_IsPlayerInCondition(client, TFCond_Dazed))
+	if (TF2_IsPlayerInCondition(client, TFCond_Dazed))
 	{
 		buttons &= ~(IN_JUMP|IN_ATTACK|IN_ATTACK2);
 		return Plugin_Changed;
-	}*/
+	}
 	return Plugin_Continue;
 }
 
@@ -287,10 +328,11 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 bool g_iCondAdd[MAXPLAYERS+1][view_as< int >(TFCond_LAST)*2];
 bool g_iCondRemove[MAXPLAYERS+1][view_as< int >(TFCond_LAST)*2];
 
+
+
 public MRESReturn CTFPlayerShared_AddCond(Address pThis, Handle hParams)
 {
-	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumHealers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
-	int client = GetEntityFromAddress(view_as< Address >(LoadFromAddress(pThis + m_pOuter, NumberType_Int32)));
+	int client = GetEntityFromAddress( pThis - m_pOuter );
 
 	CondShit shit;
 	shit.cond = DHookGetParam(hParams, 1);
@@ -299,23 +341,23 @@ public MRESReturn CTFPlayerShared_AddCond(Address pThis, Handle hParams)
 	g_Bullshit1.PushArray(shit, sizeof(shit));
 
 	if (client == -1 || !IsClientInGame(client) || !IsPlayerAlive(client))	// Sanity check
-		return;
+		return MRES_Ignored;
 
 //	PrintToChatAll("PRE %N %d %.2f", client, shit.cond, shit.time);
 
 	if (!TF2_IsPlayerInCondition(client, shit.cond))
 		g_iCondAdd[client][shit.cond] = true;
+	return MRES_Ignored;
 }
 public MRESReturn CTFPlayerShared_AddCondPost(Address pThis, Handle hParams)
 {
-	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumHealers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
-	int client = GetEntityFromAddress(view_as< Address >(LoadFromAddress(pThis + m_pOuter, NumberType_Int32)));
+	int client = GetEntityFromAddress( pThis - m_pOuter );
 
 	CondShit shit;
 	g_Bullshit1.PopArray(shit, sizeof(shit));
 
 	if (client == -1 || !IsClientInGame(client))	// Sanity check
-		return;
+		return MRES_Ignored;
 
 //	PrintToChatAll("POST %N %d %.2f", client, shit.cond, shit.time);
 
@@ -333,33 +375,34 @@ public MRESReturn CTFPlayerShared_AddCondPost(Address pThis, Handle hParams)
 		}
 	}
 	g_iCondAdd[client][shit.cond] = false;
+	return MRES_Ignored;
 }
 
 public MRESReturn CTFPlayerShared_RemoveCond(Address pThis, Handle hParams)
 {
-	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumHealers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
-	int client = GetEntityFromAddress(view_as< Address >(LoadFromAddress(pThis + m_pOuter, NumberType_Int32)));
+	int client = GetEntityFromAddress( pThis - m_pOuter );
 
 	CondShit shit;
 	shit.cond = DHookGetParam(hParams, 1);
 	g_Bullshit2.PushArray(shit, sizeof(shit));
 
 	if (client == -1 || !IsPlayerAlive(client))	// Sanity check
-		return;
+		return MRES_Ignored;
 
 	if (TF2_IsPlayerInCondition(client, shit.cond))
 		g_iCondRemove[client][shit.cond] = true;
+
+	return MRES_Ignored;
 }
 public MRESReturn CTFPlayerShared_RemoveCondPost(Address pThis, Handle hParams)
 {
-	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumHealers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
-	int client = GetEntityFromAddress(view_as< Address >(LoadFromAddress(pThis + m_pOuter, NumberType_Int32)));
+	int client = GetEntityFromAddress( pThis - m_pOuter );
 
 	CondShit shit;
 	g_Bullshit2.PopArray(shit, sizeof(shit));
 
 	if (client == -1)	// Sanity check
-		return;
+		return MRES_Ignored;
 
 	if (IsPlayerAlive(client))
 	{
@@ -373,25 +416,29 @@ public MRESReturn CTFPlayerShared_RemoveCondPost(Address pThis, Handle hParams)
 		}
 	}
 	g_iCondRemove[client][shit.cond] = false;
+
+	return MRES_Ignored;
 }
 
 public MRESReturn CTFWeaponBase_CalcIsAttackCriticalHelper(int pThis, Handle hReturn)
 {
 	// For safe keeping
 	// https://brewcrew.tf/images/gimgim.png
+	return MRES_Ignored;
 }
-/*public MRESReturn CTFWeaponBase_CalcIsAttackCriticalHelperNoCrits(int pThis, Handle hReturn)
+public MRESReturn CTFWeaponBase_CalcIsAttackCriticalHelperNoCrits(int pThis, Handle hReturn)
 {
-}*/
+		return MRES_Ignored;
+}
 
 public MRESReturn CTFWeaponBase_CalcIsAttackCriticalHelperPost(int pThis, Handle hReturn)
 {
 	return CalcIsAttackCritical(pThis, hReturn);
 }
-/*public MRESReturn CTFWeaponBase_CalcIsAttackCriticalHelperNoCritsPost(int pThis, Handle hReturn)
+public MRESReturn CTFWeaponBase_CalcIsAttackCriticalHelperNoCritsPost(int pThis, Handle hReturn)
 {
 	return CalcIsAttackCritical(pThis, hReturn);
-}*/
+}
 
 public MRESReturn CalcIsAttackCritical(int ent, Handle hReturn)
 {
@@ -415,11 +462,12 @@ public MRESReturn CalcIsAttackCritical(int ent, Handle hReturn)
 	return MRES_Ignored;
 }
 
-/*int g_TeleportObj, g_TeleportClient;
+int g_TeleportObj, g_TeleportClient;
 public MRESReturn CBaseObjectTeleporter_PlayerCanBeTeleported(int pThis, Handle hReturn, Handle hParams)
 {
 	g_TeleportObj = pThis;
 	g_TeleportClient = DHookGetParam(hParams, 1);
+	return MRES_Ignored;
 }
 public MRESReturn CBaseObjectTeleporter_PlayerCanBeTeleportedPost(int pThis, Handle hReturn, Handle hParams)
 {
@@ -437,18 +485,21 @@ public MRESReturn CBaseObjectTeleporter_PlayerCanBeTeleportedPost(int pThis, Han
 		return MRES_Supercede;
 	}
 	return MRES_Ignored;
-}*/
+}
 
 bool g_SetInWaitingForPlayers;
 public MRESReturn CTeamPlayRoundBasedRules_SetInWaitingForPlayers(Address pThis, Handle hParams)
 {
 	g_SetInWaitingForPlayers = DHookGetParam(hParams, 1);
+	return MRES_Ignored;
 }
+
 public MRESReturn CTeamPlayRoundBasedRules_SetInWaitingForPlayersPost(Address pThis, Handle hParams)
 {
 	GlobalForward f = g_SetInWaitingForPlayers ? hOnWaitingForPlayersStart : hOnWaitingForPlayersEnd;
 	Call_StartForward(f);
 	Call_Finish();
+	return MRES_Ignored;
 }
 
 public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int max)
@@ -465,7 +516,7 @@ public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int max)
 	hOnConditionAdded = new GlobalForward("TF2_OnConditionAdded", ET_Ignore, Param_Cell, Param_Cell, Param_Float);
 	hOnConditionRemoved = new GlobalForward("TF2_OnConditionRemoved", ET_Ignore, Param_Cell, Param_Cell);
 	hCalcIsAttackCritical = new GlobalForward("TF2_CalcIsAttackCritical", ET_Event, Param_Cell, Param_Cell, Param_String, Param_CellByRef);
-	//hCanPlayerTeleport = new GlobalForward("TF2_OnPlayerTeleport", ET_Event, Param_Cell, Param_Cell, Param_CellByRef);
+	hCanPlayerTeleport = new GlobalForward("TF2_OnPlayerTeleport", ET_Event, Param_Cell, Param_Cell, Param_CellByRef);
 	hOnWaitingForPlayersStart = new GlobalForward("TF2_OnWaitingForPlayersStart", ET_Ignore);
 	hOnWaitingForPlayersEnd = new GlobalForward("TF2_OnWaitingForPlayersEnd", ET_Ignore);
 
@@ -671,25 +722,73 @@ public any Native_TF2_StunPlayer(Handle plugin, int numParams)
 	return 0;
 }
 
-stock Handle DHookCreateDetourEx(GameData conf, const char[] name, CallingConvention callConv, ReturnType returntype, ThisPointerType thisType)
+stock Handle DHookCreateDetourEx(GameData conf, const char[] name, CallingConvention callConv, ReturnType returntype, ThisPointerType thisType, bool WhineAboutFailure=true)
 {
 	Handle h = DHookCreateDetour(Address_Null, callConv, returntype, thisType);
 	if (h)
-		if (!DHookSetFromConf(h, conf, SDKConf_Signature, name))
+		if (!DHookSetFromConf(h, conf, SDKConf_Signature, name) && WhineAboutFailure)
 			LogError("Could not set %s from config!", name);
 	return h;
 }
+// Following 3 stocks are from nosoop's stocksoop memory.inc. Thanks nosoop! Buy him a coffee:
+// https://www.buymeacoffee.com/nosoop
+/**
+ * Retrieves an entity index from a raw entity handle address.
+ * 
+ * Note that SourceMod's entity conversion routine is an implementation detail that may change.
+ * 
+ * @param addr			Address to a memory location.
+ * @return				Entity index, or -1 if not valid.
+ */
+stock int LoadEntityHandleFromAddress(Address addr) {
+	return EntRefToEntIndex(LoadFromAddress(addr, NumberType_Int32) | (1 << 31));
+}
 
-// Props to nosoop
-stock int GetEntityFromAddress(Address pEntity)
-{
-	if (pEntity == Address_Null)
-		return -1;
+/**
+ * Stores an entity into a raw entity handle address.  Stores zero if the entity is not valid.
+ * 
+ * Note that SourceMod's entity conversion routine is an implementation detail that may change.
+ * 
+ * @param addr			Address to a memory location.
+ * @param entity		Entity index.
+ */
+stock void StoreEntityHandleToAddress(Address addr, int entity) {
+	StoreToAddress(addr, IsValidEntity(entity)? EntIndexToEntRef(entity) & ~(1 << 31) : 0,
+			NumberType_Int32);
+}
 
-	int ent = LoadFromAddress(pEntity + view_as< Address >(FindDataMapInfo(0, "m_angRotation") + 12), NumberType_Int32) & 0xFFF;
-	if (!ent || ent == 0xFFF)
-		return -1;
-	return ent;
+/**
+ * Returns an entity index from its address by attempting to read the
+ * CBaseEntity::m_RefEHandle member.  This assumes the address of a CBaseEntity is
+ * passed in.
+ * 
+ * @param pEntity		Address of an entity.
+ * @return				Entity index, or -1 if not valid.
+ */
+stock int GetEntityFromAddress(Address pEntity) {
+	static int offs_RefEHandle;
+	if (offs_RefEHandle) {
+		return LoadEntityHandleFromAddress(pEntity + view_as<Address>(offs_RefEHandle));
+	}
+	
+	// if we don't have it already, attempt to lookup offset based on SDK information
+	// CWorld is derived from CBaseEntity so it should have both offsets
+	int offs_angRotation = FindDataMapInfo(0, "m_angRotation"),
+			offs_vecViewOffset = FindDataMapInfo(0, "m_vecViewOffset");
+	if (offs_angRotation == -1) {
+		ThrowError("Could not find offset for ((CBaseEntity) CWorld)::m_angRotation");
+	} else if (offs_vecViewOffset == -1) {
+		ThrowError("Could not find offset for ((CBaseEntity) CWorld)::m_vecViewOffset");
+	} else if ((offs_angRotation + 0x0C) != (offs_vecViewOffset - 0x04)) {
+		char game[32];
+		GetGameFolderName(game, sizeof(game));
+		ThrowError("Could not confirm offset of CBaseEntity::m_RefEHandle "
+				... "(incorrect assumption for game '%s'?)", game);
+	}
+	
+	// offset seems right, cache it for the next call
+	offs_RefEHandle = offs_angRotation + 0x0C;
+	return GetEntityFromAddress(pEntity);
 }
 stock Handle DHookCreateEx(Handle gc, const char[] key, HookType hooktype, ReturnType returntype, ThisPointerType thistype, DHookCallback callback)
 {
