@@ -289,7 +289,7 @@ bool g_iCondRemove[MAXPLAYERS+1][view_as< int >(TFCond_LAST)*2];
 
 public MRESReturn CTFPlayerShared_AddCond(Address pThis, Handle hParams)
 {
-	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumHealers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
+	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumArmorers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
 	int client = GetEntityFromAddress(view_as< Address >(LoadFromAddress(pThis + m_pOuter, NumberType_Int32)));
 
 	CondShit shit;
@@ -308,7 +308,7 @@ public MRESReturn CTFPlayerShared_AddCond(Address pThis, Handle hParams)
 }
 public MRESReturn CTFPlayerShared_AddCondPost(Address pThis, Handle hParams)
 {
-	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumHealers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
+	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumArmorers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
 	int client = GetEntityFromAddress(view_as< Address >(LoadFromAddress(pThis + m_pOuter, NumberType_Int32)));
 
 	CondShit shit;
@@ -337,7 +337,7 @@ public MRESReturn CTFPlayerShared_AddCondPost(Address pThis, Handle hParams)
 
 public MRESReturn CTFPlayerShared_RemoveCond(Address pThis, Handle hParams)
 {
-	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumHealers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
+	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumArmorers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
 	int client = GetEntityFromAddress(view_as< Address >(LoadFromAddress(pThis + m_pOuter, NumberType_Int32)));
 
 	CondShit shit;
@@ -352,7 +352,7 @@ public MRESReturn CTFPlayerShared_RemoveCond(Address pThis, Handle hParams)
 }
 public MRESReturn CTFPlayerShared_RemoveCondPost(Address pThis, Handle hParams)
 {
-	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumHealers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
+	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumArmorers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
 	int client = GetEntityFromAddress(view_as< Address >(LoadFromAddress(pThis + m_pOuter, NumberType_Int32)));
 
 	CondShit shit;
