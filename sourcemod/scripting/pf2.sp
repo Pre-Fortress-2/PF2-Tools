@@ -332,8 +332,9 @@ bool g_iCondRemove[MAXPLAYERS+1][view_as< int >(TFCond_LAST)*2];
 
 public MRESReturn CTFPlayerShared_AddCond(Address pThis, Handle hParams)
 {
-	int client = GetEntityFromAddress( pThis - m_pOuter );
-
+	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumArmorers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
+	int client = GetEntityFromAddress(view_as< Address >(LoadFromAddress(pThis + m_pOuter, NumberType_Int32)));
+  
 	CondShit shit;
 	shit.cond = DHookGetParam(hParams, 1);
 	shit.time = DHookGetParam(hParams, 2);
@@ -351,7 +352,8 @@ public MRESReturn CTFPlayerShared_AddCond(Address pThis, Handle hParams)
 }
 public MRESReturn CTFPlayerShared_AddCondPost(Address pThis, Handle hParams)
 {
-	int client = GetEntityFromAddress( pThis - m_pOuter );
+	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumArmorers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
+	int client = GetEntityFromAddress(view_as< Address >(LoadFromAddress(pThis + m_pOuter, NumberType_Int32)));
 
 	CondShit shit;
 	g_Bullshit1.PopArray(shit, sizeof(shit));
@@ -380,7 +382,8 @@ public MRESReturn CTFPlayerShared_AddCondPost(Address pThis, Handle hParams)
 
 public MRESReturn CTFPlayerShared_RemoveCond(Address pThis, Handle hParams)
 {
-	int client = GetEntityFromAddress( pThis - m_pOuter );
+	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumArmorers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
+	int client = GetEntityFromAddress(view_as< Address >(LoadFromAddress(pThis + m_pOuter, NumberType_Int32)));
 
 	CondShit shit;
 	shit.cond = DHookGetParam(hParams, 1);
@@ -396,7 +399,8 @@ public MRESReturn CTFPlayerShared_RemoveCond(Address pThis, Handle hParams)
 }
 public MRESReturn CTFPlayerShared_RemoveCondPost(Address pThis, Handle hParams)
 {
-	int client = GetEntityFromAddress( pThis - m_pOuter );
+	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumArmorers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
+	int client = GetEntityFromAddress(view_as< Address >(LoadFromAddress(pThis + m_pOuter, NumberType_Int32)));
 
 	CondShit shit;
 	g_Bullshit2.PopArray(shit, sizeof(shit));
