@@ -6,14 +6,14 @@
 #pragma semicolon 1
 #include <pf2>
 
-#define PLUGIN_VERSION 		"1.1.0"
+#define PLUGIN_VERSION 		"1.1.1"
 
 public Plugin myinfo =  {
 	name = "PF2 Tools", 
-	author = "Scag, https://sappho.io", Conneath, Sour Dani, 
+	author = "Scag, https://sappho.io, Conneath, Sour Dani", 
 	description = "PF2 natives and forwards for SourceMod", 
 	version = PLUGIN_VERSION, 
-	url = ""
+	url = "https://prefortress.com"
 };
 
 GlobalForward
