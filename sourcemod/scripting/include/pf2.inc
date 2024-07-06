@@ -624,7 +624,7 @@ stock int TF2_GetPlayerResourceData(int client, TFResourceType type)
 		return -1;
 	}
 
-	int entity = TF2_GetResourceEntity();
+	int entity = GetPlayerResourceEntity();
 
 	if (entity == -1)
 	{
@@ -661,7 +661,7 @@ stock bool TF2_SetPlayerResourceData(int client, TFResourceType type, any value)
 		return false;
 	}
 
-	int entity = TF2_GetResourceEntity();
+	int entity = GetPlayerResourceEntity();
 
 	if (entity == -1)
 	{
