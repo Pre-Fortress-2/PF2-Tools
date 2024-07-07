@@ -130,7 +130,7 @@ void WaitAFrame()
 	PrintToServer("-> TF2_RegeneratePlayer");
 
 	//This seems to crash the server......................
-	/*
+	
 	// AddCond
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(conf, SDKConf_Signature, "AddCondition");
@@ -148,7 +148,7 @@ void WaitAFrame()
 	hRemoveCondition = EndPrepSDKCall();
 	CHECK(hRemoveCondition, "TF2_RemoveCondition");
 	PrintToServer("-> TF2_RemoveCondition");
-	*/
+	
 	// Disguise
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(conf, SDKConf_Signature, "Disguise");
@@ -600,7 +600,7 @@ public any Native_TF2_AddCondition(Handle plugin, int numParams)
 	if (duration < -1.0)
 		duration = -1.0;
 
-	//SDKCall(hAddCondition, GetEntityAddress(client) + view_as< Address >(FindSendPropInfo("CTFPlayer", "m_Shared")), cond, duration, provider);
+	SDKCall(hAddCondition, GetEntityAddress(client) + view_as< Address >(FindSendPropInfo("CTFPlayer", "m_Shared")), cond, duration );
 	return 0;
 }
 
