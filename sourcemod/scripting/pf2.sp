@@ -6,14 +6,14 @@
 #pragma semicolon 1
 #include <pf2>
 
-#define PLUGIN_VERSION 		"1.1.1"
+#define PLUGIN_VERSION 		"1.1.0"
 
 public Plugin myinfo =  {
 	name = "PF2 Tools", 
 	author = "Scag, https://sappho.io, Conneath, Sour Dani", 
 	description = "PF2 natives and forwards for SourceMod", 
 	version = PLUGIN_VERSION, 
-	url = "https://prefortress.com"
+	url = ""
 };
 
 GlobalForward
@@ -35,6 +35,7 @@ Handle
 	hRemovePlayerDisguise
 ;
 
+/*
 enum struct stun_struct_t
 {
 	int hPlayer;
@@ -76,7 +77,7 @@ enum struct stun_struct_t
 stun_struct_t
 	g_Stuns[MAXPLAYERS+1]
 ;
-
+*/
 // I hate windows, so, so much
 ArrayStack
 	g_Bullshit1,
@@ -114,9 +115,6 @@ void WaitAFrame()
 	CHECK(hIgnitePlayer, "TF2_IgnitePlayer");
 	PrintToServer("-> TF2_IgnitePlayer");
 
-	//Address sig = conf.GetMemSig("Burn");
-	//LogMessage("Sig = %x", sig);
-
 	// Respawn
 	StartPrepSDKCall(SDKCall_Player);
 	PrepSDKCall_SetFromConf(conf, SDKConf_Virtual, "ForceRespawn");
@@ -131,13 +129,14 @@ void WaitAFrame()
 	CHECK(hRegeneratePlayer, "TF2_RegeneratePlayer");
 	PrintToServer("-> TF2_RegeneratePlayer");
 
-
+	//This seems to crash the server......................
+	/*
 	// AddCond
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(conf, SDKConf_Signature, "AddCondition");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	PrepSDKCall_AddParameter(SDKType_Float, SDKPass_Plain);
-	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
+	//PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL); // We don't have a CBasePlayer* parameter in our version of the function.
 	hAddCondition = EndPrepSDKCall();
 	CHECK(hAddCondition, "TF2_AddCondition");
 	PrintToServer("-> TF2_AddCondition");
@@ -149,13 +148,13 @@ void WaitAFrame()
 	hRemoveCondition = EndPrepSDKCall();
 	CHECK(hRemoveCondition, "TF2_RemoveCondition");
 	PrintToServer("-> TF2_RemoveCondition");
-
+	*/
 	// Disguise
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(conf, SDKConf_Signature, "Disguise");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
+	//PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL); // We don't pass a CBaseEntity* paramater in this function.
 	hDisguisePlayer = EndPrepSDKCall();
 	CHECK(hDisguisePlayer, "TF2_DisguisePlayer");
 	PrintToServer("-> TF2_DisguisePlayer");
@@ -169,12 +168,14 @@ void WaitAFrame()
 
 	// DHooks
 	Handle hook;
+	//This seems to crash the server......................
+	/*
 	hook = DHookCreateDetourEx(conf, "AddCondition", CallConv_THISCALL, ReturnType_Void, ThisPointer_Address);
 	if (hook)
 	{
 		DHookAddParam(hook, HookParamType_Int);
 		DHookAddParam(hook, HookParamType_Float);
-		DHookAddParam(hook, HookParamType_Int);	// Pass as Int so null providers aren't "world"
+		//DHookAddParam(hook, HookParamType_Int);	// Pass as Int so null providers aren't "world" // No CBasePlayer* parameter in AddCond
 		// The way the ext does it is pretty stupid, so let's just cheese it
 		// This is probably better since devs can hook and remove conds before any logic gets churned
 		DHookEnableDetour(hook, false, CTFPlayerShared_AddCond);
@@ -189,14 +190,14 @@ void WaitAFrame()
 	if (hook)
 	{
 		DHookAddParam(hook, HookParamType_Int);
-		DHookAddParam(hook, HookParamType_Bool);
+		//DHookAddParam(hook, HookParamType_Bool); // NO boolean parameter
 		// Same as the AddCond cheese
 		DHookEnableDetour(hook, false, CTFPlayerShared_RemoveCond);
 		DHookEnableDetour(hook, true, CTFPlayerShared_RemoveCondPost);
 	}
 	else LogError("Could not load detour for RemoveCondition, TF2_OnConditionRemoved forward has been disabled");
 	PrintToServer("-> RemoveCondition");
-
+	*/
 	hook = DHookCreateDetourEx(conf, "CanPlayerTeleport", CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity);
 	if (hook)
 	{
@@ -271,70 +272,73 @@ void WaitAFrame()
 
 public void OnClientPutInServer(int client)
 {
-	g_Stuns[client].Reset();
+	//g_Stuns[client].Reset();
 	SDKHook(client, SDKHook_PreThink, OnPreThink);
 }
 
 public void OnPreThink(int client)
 {
-	if (TF2_IsPlayerInCondition(client, TFCond_Dazed))
-	{
-		if (g_Stuns[client].bActive && GetGameTime() < g_Stuns[client].flExpireTime)
-		{
-			g_Stuns[client].Reset();
-			g_Stuns[client].KillAllParticles(client);
-			TF2_RemoveCondition(client, TFCond_Dazed);
-		}
-	}
+	//if (TF2_IsPlayerInCondition(client, TFCond_Dazed))
+	//{
+	//	if (g_Stuns[client].bActive && GetGameTime() < g_Stuns[client].flExpireTime)
+	//	{
+	//		g_Stuns[client].Reset();
+	//		g_Stuns[client].KillAllParticles(client);
+	//		TF2_RemoveCondition(client, TFCond_Dazed);
+	//	}
+	//}
 }
 
 public void OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetClientOfUserId(event.GetInt("userid"));
-	if (g_Stuns[client].bActive)
-	{
-		g_Stuns[client].Reset();
-		g_Stuns[client].KillAllParticles(client);
-	}
+	//int client = GetClientOfUserId(event.GetInt("userid"));
+	//if (g_Stuns[client].bActive)
+	//{
+	//	g_Stuns[client].Reset();
+	//	g_Stuns[client].KillAllParticles(client);
+	//}
 }
 
 public void TF2_OnConditionAdded(int client, TFCond cond, float dur)
 {
 	// Fuck it, honestly. Better than no stuns at all
-	if (cond == TFCond_Dazed && g_Stuns[client].bActive)
-		if (!(g_Stuns[client].iStunFlags & TF_STUNFLAG_NOSOUNDOREFFECT))
-			if (g_Stuns[client].iStunFlags & TF_STUNFLAG_GHOSTEFFECT)
-				AttachParticle(client, "yikes_fx", "head", dur);
-			else AttachParticle(client, "conc_stars", "head", dur);
+	//if (cond == TFCond_Dazed && g_Stuns[client].bActive)
+	//	if (!(g_Stuns[client].iStunFlags & TF_STUNFLAG_NOSOUNDOREFFECT))
+	//		if (g_Stuns[client].iStunFlags & TF_STUNFLAG_GHOSTEFFECT)
+	//			AttachParticle(client, "yikes_fx", "head", dur);
+	//		else AttachParticle(client, "conc_stars", "head", dur);
 }
 
 public void TF2_OnConditionRemoved(int client, TFCond cond)
 {
-	if (cond == TFCond_Dazed)
-		g_Stuns[client].KillAllParticles(client);
+	//if (cond == TFCond_Dazed)
+	//	g_Stuns[client].KillAllParticles(client);
 }
 
 public Action OnPlayerRunCmd(int client, int &buttons)
 {
+/*
 	if (TF2_IsPlayerInCondition(client, TFCond_Dazed))
 	{
 		buttons &= ~(IN_JUMP|IN_ATTACK|IN_ATTACK2);
 		return Plugin_Changed;
 	}
+*/
 	return Plugin_Continue;
 }
 
+//This seems to crash the server......................
 // x2 because conditions will be added maybe maybe maybe?
 bool g_iCondAdd[MAXPLAYERS+1][view_as< int >(TFCond_LAST)*2];
 bool g_iCondRemove[MAXPLAYERS+1][view_as< int >(TFCond_LAST)*2];
 
 
+//This seems to crash the server......................
 
 public MRESReturn CTFPlayerShared_AddCond(Address pThis, Handle hParams)
 {
-	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumArmorers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
-	int client = GetEntityFromAddress(view_as< Address >(LoadFromAddress(pThis + m_pOuter, NumberType_Int32)));
-  
+	int client = GetEntityFromAddress( pThis - m_pOuter );
+
 	CondShit shit;
 	shit.cond = DHookGetParam(hParams, 1);
 	shit.time = DHookGetParam(hParams, 2);
@@ -352,8 +356,7 @@ public MRESReturn CTFPlayerShared_AddCond(Address pThis, Handle hParams)
 }
 public MRESReturn CTFPlayerShared_AddCondPost(Address pThis, Handle hParams)
 {
-	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumArmorers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
-	int client = GetEntityFromAddress(view_as< Address >(LoadFromAddress(pThis + m_pOuter, NumberType_Int32)));
+	int client = GetEntityFromAddress( pThis - m_pOuter );
 
 	CondShit shit;
 	g_Bullshit1.PopArray(shit, sizeof(shit));
@@ -382,8 +385,7 @@ public MRESReturn CTFPlayerShared_AddCondPost(Address pThis, Handle hParams)
 
 public MRESReturn CTFPlayerShared_RemoveCond(Address pThis, Handle hParams)
 {
-	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumArmorers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
-	int client = GetEntityFromAddress(view_as< Address >(LoadFromAddress(pThis + m_pOuter, NumberType_Int32)));
+	int client = GetEntityFromAddress( pThis - m_pOuter );
 
 	CondShit shit;
 	shit.cond = DHookGetParam(hParams, 1);
@@ -399,8 +401,7 @@ public MRESReturn CTFPlayerShared_RemoveCond(Address pThis, Handle hParams)
 }
 public MRESReturn CTFPlayerShared_RemoveCondPost(Address pThis, Handle hParams)
 {
-	Address m_pOuter = view_as< Address >(FindSendPropInfo("CTFPlayer", "m_nNumArmorers") - FindSendPropInfo("CTFPlayer", "m_Shared") + 4);
-	int client = GetEntityFromAddress(view_as< Address >(LoadFromAddress(pThis + m_pOuter, NumberType_Int32)));
+	int client = GetEntityFromAddress( pThis - m_pOuter );
 
 	CondShit shit;
 	g_Bullshit2.PopArray(shit, sizeof(shit));
@@ -574,7 +575,7 @@ public any Native_TF2_RegeneratePlayer(Handle plugin, int numParams)
 	SDKCall(hRegeneratePlayer, client);
 	return 0;
 }
-
+//This stuff does nothing...................... But it's included solely due to the fact that if it's not, you can't compile certain things.
 public any Native_TF2_AddCondition(Handle plugin, int numParams)
 {
 	CHECK(hAddCondition, "AddCondition");
@@ -598,7 +599,7 @@ public any Native_TF2_AddCondition(Handle plugin, int numParams)
 	if (duration < -1.0)
 		duration = -1.0;
 
-	SDKCall(hAddCondition, GetEntityAddress(client) + view_as< Address >(FindSendPropInfo("CTFPlayer", "m_Shared")), cond, duration, provider);
+	//SDKCall(hAddCondition, GetEntityAddress(client) + view_as< Address >(FindSendPropInfo("CTFPlayer", "m_Shared")), cond, duration, provider);
 	return 0;
 }
 
@@ -642,9 +643,11 @@ public any Native_TF2_RemovePlayerDisguise(Handle plugin, int numParams)
 	return 0;
 }
 
+// Note: No stunning, so this function is stubbed for the meantime.
 // No support, gotta do it the fun way
 public any Native_TF2_StunPlayer(Handle plugin, int numParams)
 {
+/*
 	int client = GetNativeCell(1);
 	DECLARE_BS(client);
 
@@ -723,6 +726,7 @@ public any Native_TF2_StunPlayer(Handle plugin, int numParams)
 
 	// This condition literally isn't touched in the source, so I have to do fucking EVERYTHING
 	TF2_AddCondition(client, TFCond_Dazed, g_Stuns[client].flDuration);
+*/
 	return 0;
 }
 
