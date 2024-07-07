@@ -189,7 +189,7 @@ void WaitAFrame()
 	if (hook)
 	{
 		DHookAddParam(hook, HookParamType_Int);
-		//DHookAddParam(hook, HookParamType_Bool); // NO boolean parameter
+		//DHookAddParam(hook, HookParamType_Bool); // PF2: NO boolean parameter
 		// Same as the AddCond cheese
 		DHookEnableDetour(hook, false, CTFPlayerShared_RemoveCond);
 		DHookEnableDetour(hook, true, CTFPlayerShared_RemoveCondPost);
