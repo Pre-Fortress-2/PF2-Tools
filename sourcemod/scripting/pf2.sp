@@ -169,7 +169,7 @@ void WaitAFrame()
 	// DHooks
 	Handle hook;
 	//This seems to crash the server......................
-	/*
+	
 	hook = DHookCreateDetourEx(conf, "AddCondition", CallConv_THISCALL, ReturnType_Void, ThisPointer_Address);
 	if (hook)
 	{
@@ -185,7 +185,6 @@ void WaitAFrame()
 	PrintToServer("-> AddCondition");
 
 
-
 	hook = DHookCreateDetourEx(conf, "RemoveCondition", CallConv_THISCALL, ReturnType_Void, ThisPointer_Address);
 	if (hook)
 	{
@@ -195,9 +194,10 @@ void WaitAFrame()
 		DHookEnableDetour(hook, false, CTFPlayerShared_RemoveCond);
 		DHookEnableDetour(hook, true, CTFPlayerShared_RemoveCondPost);
 	}
+	
 	else LogError("Could not load detour for RemoveCondition, TF2_OnConditionRemoved forward has been disabled");
 	PrintToServer("-> RemoveCondition");
-	*/
+	
 	hook = DHookCreateDetourEx(conf, "CanPlayerTeleport", CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity);
 	if (hook)
 	{
@@ -586,13 +586,14 @@ public any Native_TF2_AddCondition(Handle plugin, int numParams)
 	if (cond < 0)
 		return ThrowNativeError(SP_ERROR_NATIVE, "Invalid condition index (%d) specified.", cond);
 
-	int provider = GetNativeCell(4);
-	if (0 < provider <= MaxClients)
-	{
-		if (!IsClientInGame(provider))
-			return ThrowNativeError(SP_ERROR_NATIVE, "Provider %d is not in-game!", provider);
-	}
-	else provider = -1;
+	// Provider pointer does not exist in PF2
+	//int provider = GetNativeCell(4);
+	//if (0 < provider <= MaxClients)
+	//{
+	//	if (!IsClientInGame(provider))
+	//		return ThrowNativeError(SP_ERROR_NATIVE, "Provider %d is not in-game!", provider);
+	//}
+	//else provider = -1;
 
 	// If they've gotten this far, just help them out
 	float duration = GetNativeCell(3);
@@ -625,12 +626,13 @@ public any Native_TF2_DisguisePlayer(Handle plugin, int numParams)
 
 	int team = GetNativeCell(2);
 	int class = GetNativeCell(3);
-	int target = GetNativeCell(4);
+	// No target pointer in PF2.
+	//int target = GetNativeCell(4);
 
-	if (target == 0)
-		target = -1;		// -1 -> NULL
+	//if (target == 0)
+	//	target = -1;		// -1 -> NULL
 
-	SDKCall(hDisguisePlayer, GetEntityAddress(client) + view_as< Address >(FindSendPropInfo("CTFPlayer", "m_Shared")), team, class, target);
+	SDKCall(hDisguisePlayer, GetEntityAddress(client) + view_as< Address >(FindSendPropInfo("CTFPlayer", "m_Shared")), team, class );
 	return 0;
 }
 
