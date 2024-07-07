@@ -357,9 +357,9 @@ stock TFClassType TF2_GetClass(const char[] classname)
 	else if (StrEqual(classname, "pyro"))
 		return TFClass_Pyro;
 	else if (StrEqual(classname, "demoman"))
-		return TFClass_DemoMan;
+		return TFClass_Demoman;
 	else if (StrEqual(classname, "heavyweapons"))
-		return TFClass_Heavy;
+		return TFClass_HeavyWeapons;
 	else if (StrEqual(classname, "engineer"))
 		return TFClass_Engineer;
 	else if (StrEqual(classname, "medic"))
