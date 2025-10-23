@@ -35,49 +35,6 @@ Handle
 	hRemovePlayerDisguise
 ;
 
-/*
-enum struct stun_struct_t
-{
-	int hPlayer;
-	float flDuration;
-	float flExpireTime;
-	float flStartFadeTime;
-	float flStunAmount;
-	int iStunFlags;
-	bool bActive;		// Hack
-
-	void Reset()
-	{
-		this.hPlayer = 0;
-		this.flDuration = 0.0;
-		this.flExpireTime = 0.0;
-		this.flStartFadeTime = 0.0;
-		this.flStunAmount = 0.0;
-		this.iStunFlags = 0;
-		this.bActive = false;
-	}
-
-	void KillAllParticles(int client)
-	{
-		int ent = -1;
-		char name[32];
-		while ((ent = FindEntityByClassname(ent, "info_particle_system")) != -1)
-		{
-			if (GetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity") == client)
-			{
-				GetEntPropString(ent, Prop_Data, "m_iszEffectName", name, sizeof(name));
-				if (!strcmp(name, "yikes_fx") || !strcmp(name, "conc_stars"))
-					RemoveEntity(ent);
-			}
-		}
-	}
-}
-
-
-stun_struct_t
-	g_Stuns[MAXPLAYERS+1]
-;
-*/
 // I hate windows, so, so much
 ArrayStack
 	g_Bullshit1,
@@ -109,8 +66,8 @@ void WaitAFrame()
 	// Burn
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(conf, SDKConf_Signature, "Burn");
-	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer);
-	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
+	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer); // Player
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKType_PlainOldData, VDECODE_FLAG_ALLOWNULL ); // Napalm
 	hIgnitePlayer = EndPrepSDKCall();
 	CHECK(hIgnitePlayer, "TF2_IgnitePlayer");
 	PrintToServer("-> TF2_IgnitePlayer");
@@ -128,15 +85,12 @@ void WaitAFrame()
 	hRegeneratePlayer = EndPrepSDKCall();
 	CHECK(hRegeneratePlayer, "TF2_RegeneratePlayer");
 	PrintToServer("-> TF2_RegeneratePlayer");
-
-	//This seems to crash the server......................
 	
 	// AddCond
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(conf, SDKConf_Signature, "AddCondition");
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	PrepSDKCall_AddParameter(SDKType_Float, SDKPass_Plain);
-	//PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL); // We don't have a CBasePlayer* parameter in our version of the function.
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // condition
+	PrepSDKCall_AddParameter(SDKType_Float, SDKPass_Plain); // duration
 	hAddCondition = EndPrepSDKCall();
 	CHECK(hAddCondition, "TF2_AddCondition");
 	PrintToServer("-> TF2_AddCondition");
@@ -144,7 +98,7 @@ void WaitAFrame()
 	// RemoveCond
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(conf, SDKConf_Signature, "RemoveCondition");
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); //
 	hRemoveCondition = EndPrepSDKCall();
 	CHECK(hRemoveCondition, "TF2_RemoveCondition");
 	PrintToServer("-> TF2_RemoveCondition");
@@ -152,9 +106,8 @@ void WaitAFrame()
 	// Disguise
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(conf, SDKConf_Signature, "Disguise");
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	//PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL); // We don't pass a CBaseEntity* paramater in this function.
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // team
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // class
 	hDisguisePlayer = EndPrepSDKCall();
 	CHECK(hDisguisePlayer, "TF2_DisguisePlayer");
 	PrintToServer("-> TF2_DisguisePlayer");
@@ -427,13 +380,11 @@ public MRESReturn CTFPlayerShared_RemoveCondPost(Address pThis, Handle hParams)
 
 public MRESReturn CTFWeaponBase_CalcIsAttackCriticalHelper(int pThis, Handle hReturn)
 {
-	// For safe keeping
-	// https://brewcrew.tf/images/gimgim.png
 	return MRES_Ignored;
 }
 public MRESReturn CTFWeaponBase_CalcIsAttackCriticalHelperNoCrits(int pThis, Handle hReturn)
 {
-		return MRES_Ignored;
+	return MRES_Ignored;
 }
 
 public MRESReturn CTFWeaponBase_CalcIsAttackCriticalHelperPost(int pThis, Handle hReturn)
@@ -516,7 +467,6 @@ public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int max)
 	CreateNative("TF2_RemoveCondition", Native_TF2_RemoveCondition);
 	CreateNative("TF2_DisguisePlayer", Native_TF2_DisguisePlayer);
 	CreateNative("TF2_RemovePlayerDisguise", Native_TF2_RemovePlayerDisguise);
-	CreateNative("TF2_StunPlayer", Native_TF2_StunPlayer);
 
 	hOnConditionAdded = new GlobalForward("TF2_OnConditionAdded", ET_Ignore, Param_Cell, Param_Cell, Param_Float);
 	hOnConditionRemoved = new GlobalForward("TF2_OnConditionRemoved", ET_Ignore, Param_Cell, Param_Cell);

@@ -7,24 +7,7 @@
 	#error You cannot have both TF2 and PF2 includes included in your plugin
 #endif
 
-// We're overriding this shit
-
-// These do nothing at the moment. PF2 does not have stunning.
-
-//#define TF_STUNFLAG_SLOWDOWN        (1 << 0)    /**< activates slowdown modifier */
-//#define TF_STUNFLAG_BONKSTUCK       (1 << 1)    /**< bonk sound, stuck */
-//#define TF_STUNFLAG_LIMITMOVEMENT   (1 << 2)    /**< disable forward/backward movement */
-//#define TF_STUNFLAG_CHEERSOUND      (1 << 3)    /**< cheering sound */
-//#define TF_STUNFLAG_NOSOUNDOREFFECT (1 << 5)    /**< no sound or particle */
-//#define TF_STUNFLAG_THIRDPERSON     (1 << 6)    /**< panic animation */
-//#define TF_STUNFLAG_GHOSTEFFECT     (1 << 7)    /**< ghost particles */
-//#define TF_STUNFLAG_SOUND           (1 << 8)    /**< sound */
-
-//#define TF_STUNFLAGS_LOSERSTATE     TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT|TF_STUNFLAG_THIRDPERSON
-//#define TF_STUNFLAGS_GHOSTSCARE     TF_STUNFLAG_GHOSTEFFECT|TF_STUNFLAG_THIRDPERSON
-//#define TF_STUNFLAGS_SMALLBONK      TF_STUNFLAG_THIRDPERSON|TF_STUNFLAG_SLOWDOWN
-//#define TF_STUNFLAGS_NORMALBONK     TF_STUNFLAG_BONKSTUCK
-//#define TF_STUNFLAGS_BIGBONK        TF_STUNFLAG_CHEERSOUND|TF_STUNFLAG_BONKSTUCK
+#define TF_PLAYER_WEAPON_COUNT 7 // 0-5 is weapons, 6-7 are grenades
 
 enum TFClassType
 {
@@ -38,9 +21,8 @@ enum TFClassType
 	TFClass_Pyro,
 	TFClass_Spy,
 	TFClass_Engineer,
-	TFClass_Civilian	
+	TFClass_Civilian
 };
-
 
 enum TFTeam
 {
@@ -48,10 +30,8 @@ enum TFTeam
 	TFTeam_Spectator = 1,
 	TFTeam_Red = 2,
 	TFTeam_Blue = 3,
-	//TFTeam_Green,	
-	//TFTeam_Yellow,
 
-	TFTeam_COUNT
+	TFTeam_Count
 };
 
 enum TFCond
@@ -87,6 +67,7 @@ enum TFCond
 	TFCond_Leg_Hallucinating, // 26: Gas Grenade condition
 	
 	TFCond_SpeedBoost, // 27: Speed boost condition
+	TFCond_CritBoosted_On_Flag_Pickup // 28: Crit boost from flag pick up
 	
 	TFCond_LAST // Last condition
 };
@@ -139,18 +120,12 @@ enum TFObjectMode
 #define TF_CONDFLAG_LEG_DAMAGED_GUNSHOT   		(1 << 25)
 #define TF_CONDFLAG_HALLUCINATION          		(1 << 26)
 #define TF_CONDFLAG_SPEED_BOOST        			(1 << 27)
+#define TF_CONDFLAG_CRITBOOSTED_ON_FLAG_PICKUP	(1 << 28)
 
 #define TF_DEATHFLAG_KILLERDOMINATION   (1 << 0)
 #define TF_DEATHFLAG_ASSISTERDOMINATION (1 << 1)
 #define TF_DEATHFLAG_KILLERREVENGE      (1 << 2)
 #define TF_DEATHFLAG_ASSISTERREVENGE    (1 << 3)
-//#define TF_DEATHFLAG_FIRSTBLOOD         (1 << 4)
-//#define TF_DEATHFLAG_DEADRINGER         (1 << 5)
-//#define TF_DEATHFLAG_INTERRUPTED        (1 << 6)
-//#define TF_DEATHFLAG_GIBBED             (1 << 7)
-//#define TF_DEATHFLAG_PURGATORY          (1 << 8)
-//#define TF_DEATHFLAG_MINIBOSS           (1 << 9)
-//#define TF_DEATHFLAG_AUSTRALIUM         (1 << 10)
 
 // Custom kill identifiers for the customkill property on the player_death event
 enum {
@@ -166,13 +141,17 @@ enum {
 	TF_DMG_CUSTOM_DISPENSER_EXPLOSION,
 	TF_DMG_CUSTOM_TELEPORTER_EXPLOSION,
 	TF_DMG_CUSTOM_INFECTION,
-	TF_DMG_CUSTOM_GRENADE_BONK,
+	TF_DMG_CUSTOM_GRENADE_IMPACT,
 	TF_DMG_CUSTOM_EMP_EXPLOSION,
 	TF_DMG_CUSTOM_CALTROP,
 	TF_DMG_CUSTOM_TAUNTATK_HADOUKEN,
 	TF_DMG_CUSTOM_TAUNTATK_HIGH_NOON,
 	TF_DMG_CUSTOM_TAUNTATK_FENCING,
 	TF_DMG_CUSTOM_TELEFRAG,
+	TF_DMG_CUSTOM_PUMPKIN_BOMB,
+	TF_DMG_CUSTOM_SNOWMAN_NORMAL,
+	TF_DMG_CUSTOM_SNOWMAN_CONC,
+	TF_DMG_CUSTOM_SNOWMAN_NAPALM
 };
 
 // Weapon codes as used in some events, such as player_death
@@ -272,21 +251,9 @@ enum TFResourceType
 	TFResource_Score,
 	TFResource_Deaths,
 	TFResource_TotalScore,
-	TFResource_Captures,
-	TFResource_Defenses,
-	TFResource_Dominations,
-	TFResource_Revenge,
-	TFResource_BuildingsDestroyed,
-	TFResource_Headshots,
-	TFResource_Backstabs,
-	TFResource_HealPoints,
-	TFResource_Invulns,
-	TFResource_Teleports,
-	TFResource_ResupplyPoints,
-	TFResource_KillAssists,
 	TFResource_MaxHealth,
 	TFResource_PlayerClass,
-	//TFResource_ArmorRepaired,
+	TFResource_MaxArmor,
 	TFResource_COUNT
 };
 
@@ -296,21 +263,9 @@ static const char TFResourceNames[TFResource_COUNT][] =
 	"m_iScore",
 	"m_iDeaths",
 	"m_iTotalScore",
-	"m_iCaptures",
-	"m_iDefenses",
-	"m_iDominations",
-	"m_iRevenge",
-	"m_iBuildingsDestroyed",
-	"m_iHeadshots",
-	"m_iBackstabs",
-	"m_iHealPoints",
-	"m_iInvulns",
-	"m_iTeleports",
-	"m_iResupplyPoints",
-	"m_iKillAssists",
 	"m_iMaxHealth",
 	"m_iPlayerClass",
-	//"m_iMaxArmor"
+	"m_iMaxArmor"
 };
 
 /**
@@ -479,11 +434,11 @@ stock void TF2_RemoveWeaponSlot(int client, int slot)
 	{
 		// bug #6206
 		// papering over a valve bug where a weapon's extra wearables aren't properly removed from the weapon's owner
-		int extraWearable = GetEntPropEnt(weaponIndex, Prop_Send, "m_hExtraWearable");
-		if (extraWearable != -1)
-		{
-			RemoveEntity(extraWearable);
-		}
+		//int extraWearable = GetEntPropEnt(weaponIndex, Prop_Send, "m_hExtraWearable");
+		//if (extraWearable != -1)
+		//{
+		//	RemoveEntity(extraWearable);
+		//}
 
 //		extraWearable = GetEntPropEnt(weaponIndex, Prop_Send, "m_hExtraWearableViewModel");
 //		if (extraWearable != -1)
@@ -502,7 +457,7 @@ stock void TF2_RemoveWeaponSlot(int client, int slot)
  */
 stock void TF2_RemoveAllWeapons(int client)
 {
-	for (int i = 0; i <= 5; i++)
+	for (int i = 0; i < TF_PLAYER_WEAPON_COUNT; i++)
 	{
 		TF2_RemoveWeaponSlot(client, i);
 	}
@@ -542,44 +497,7 @@ stock bool TF2_IsPlayerInCondition(int client, TFCond cond)
 			{
 				return true;
 			}
-
-			/*if ((GetEntProp(client, Prop_Send, "_condition_bits") & bit) == bit)
-			{
-				return true;
-			}*/
 		}
-/*		case 1:
-		{
-			int bit = (1 << (iCond - 32));
-			if ((GetEntProp(client, Prop_Send, "m_nPlayerCondEx") & bit) == bit)
-			{
-				return true;
-			}
-		}
-		case 2:
-		{
-			int bit = (1 << (iCond - 64));
-			if ((GetEntProp(client, Prop_Send, "m_nPlayerCondEx2") & bit) == bit)
-			{
-				return true;
-			}
-		}
-		case 3:
-		{
-			int bit = (1 << (iCond - 96));
-			if ((GetEntProp(client, Prop_Send, "m_nPlayerCondEx3") & bit) == bit)
-			{
-				return true;
-			}
-		}*/
-//		case 4:
-//		{
-//			int bit = (1 << (iCond - 128));
-//			if ((GetEntProp(client, Prop_Send, "m_nPlayerCondEx4") & bit) == bit)
-//			{
-//				return true;
-//			}
-//		}
 		default:
 		{
 			ThrowError("Invalid TFCond value %d", iCond);
