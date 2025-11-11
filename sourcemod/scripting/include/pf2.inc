@@ -67,7 +67,7 @@ enum TFCond
 	TFCond_Leg_Hallucinating, // 26: Gas Grenade condition
 	
 	TFCond_SpeedBoost, // 27: Speed boost condition
-	TFCond_CritBoosted_On_Flag_Pickup // 28: Crit boost from flag pick up
+	TFCond_CritBoosted_On_Flag_Pickup, // 28: Crit boost from flag pick up
 	
 	TFCond_LAST // Last condition
 };
