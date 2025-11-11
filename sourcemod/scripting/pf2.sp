@@ -67,7 +67,7 @@ void WaitAFrame()
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(conf, SDKConf_Signature, "Burn");
 	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer); // Player
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKType_Plain); // Napalm
+	PrepSDKCall_AddParameter(SDKType_Bool, SDKType_Plain); // Napalm
 	hIgnitePlayer = EndPrepSDKCall();
 	CHECK(hIgnitePlayer, "TF2_IgnitePlayer");
 	PrintToServer("-> TF2_IgnitePlayer");
