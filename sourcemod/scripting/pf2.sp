@@ -6,7 +6,7 @@
 #pragma semicolon 1
 #include <pf2>
 
-#define PLUGIN_VERSION 		"1.1.1"
+#define PLUGIN_VERSION 		"1.1.2"
 
 public Plugin myinfo =  {
 	name = "PF2 Tools", 
@@ -67,7 +67,7 @@ void WaitAFrame()
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(conf, SDKConf_Signature, "Burn");
 	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer); // Player
-	PrepSDKCall_AddParameter(SDKType_Bool, SDKType_Plain); // Napalm
+	//PrepSDKCall_AddParameter(SDKType_Bool, SDKType_ByValue);
 	hIgnitePlayer = EndPrepSDKCall();
 	CHECK(hIgnitePlayer, "TF2_IgnitePlayer");
 	PrintToServer("-> TF2_IgnitePlayer");
